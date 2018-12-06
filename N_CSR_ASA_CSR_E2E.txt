@@ -1,0 +1,173 @@
+#NSD - Network Service descriptor
+# This describe a simple CSR, ASAv, CSR chain
+#Where there is a CSR at each Endpoint
+
+
+nfvo {
+	nsd N_CSR_ASA_CSR_E2E {
+		vnfd V_ASA;
+		vnfd V_CSR;
+		#service-access-point-descriptor (SAPD) is the external connection points in
+		#chain
+		#THis defines consumer SAPDs
+		service-access-point-descriptor FACING_CONSUMER_SAPD {
+			consumer-endpoint; #This is ingress into the chain
+		}
+		service-access-point-descriptor MANAGEMENT; #connction to management interface of the VNF
+		#This defines provider SAPDs
+		service-access-point-descriptor FACING_PROVIDER_SAPD {
+			provider-endpoint; #This is egress out of the chain
+			#VLD (virtual-link-descriptor) are the internal chain links
+		virtual-link-descriptor INTER_VNF_CSR_ASA_VL {
+			version 1;
+			connectivity-type {
+				layer-protocol Ethernet;
+			}
+			deployment-flavor small {
+				qos {
+					latency                10;
+					packet-delay-variation 5;
+				}
+			}
+		}
+		virtual-link-descriptor INTER_VNF_ASA_CSR_VL {
+			version 1;
+			connectivity-type {
+				layer-protocol Ethernet;
+			}
+			deployment-flavor small {
+				qos {
+					latency                10;
+					packet-delay-variation 5;
+				}
+			}
+		}
+		virtual-link-descriptor ASA_FAILOVER_VL {
+			version 1;
+			connectivity-type {
+				layer-protocol Ethernet;
+			}
+			deployment-flavor small {
+				qos {
+					latency                10;
+					packet-delay-variation 5;
+				}
+			}
+		}
+		#define the VNFs that constitute this chain
+		deployment-flavor HA {
+		#Below define ASAv Primary VNF Instance
+			vnf-profile ASA_P {
+				vnfd                    V_ASA;
+				flavor                  VDU_ASA_SRIOV;
+				instantiation-level     V_ASA;
+				min-number-of-instances 1;
+				max-number-of-instances 1;
+				affinity-or-anti-affinity-group ASA_GROUP;
+				virtual-link-connectivity ASA_FAILOVER_VL NIC1;
+				virtual-link-connectivity INTER_VNF_CSR_ASA_VL NIC2;
+				virtual-link-connectivity INTER_VNF_ASA_CSR_VL NIC3;
+				sapd-connectivity MANAGEMENT MANAGEMENT;
+			}
+			#Below define ASAv Secondary VNF Instance
+			vnf-profile ASA_S {
+				vnfd                    V_ASA;
+				flavor                  VDU_ASA_SRIOV;
+				instantiation-level     V_ASA;
+				min-number-of-instances 1;
+				max-number-of-instances 1;
+				affinity-or-anti-affinity-group ASA_GROUP;
+				virtual-link-connectivity ASA_FAILOVER_VL NIC1 ;
+				virtual-link-connectivity INTER_VNF_CSR_ASA_VL NIC2;
+				virtual-link-connectivity INTER_VNF_ASA_CSR_VL NIC3;
+				sapd-connectivity MANAGEMENT MANAGEMENT;
+			}
+			#Below define CSR consumer endpoint
+			vnf-profile CSR_C {
+				vnfd                    V_CSR;
+				flavor                  VDU_CSR_SRIOV;
+				instantiation-level     V_CSR;
+				min-number-of-instances 1;
+				max-number-of-instances 1;
+				affinity-or-anti-affinity-group CSR_C_GROUP;
+				virtual-link-connectivity INTER_VNF_CSR_ASA_VL NIC2;
+				sapd-connectivity FACING_CONSUMER_SAPD NIC1;
+				sapd-connectivity MANAGEMENT MANAGEMENT;
+			}
+			#Below define CSR consumer endpoint
+			vnf-profile CSR_P {
+				vnfd                    V_CSR;
+				flavor                  VDU_CSR_SRIOV;
+				instantiation-level     V_CSR;
+				min-number-of-instances 1;
+				max-number-of-instances 1;
+				affinity-or-anti-affinity-group CSR_P_GROUP;
+				virtual-link-connectivity INTER_VNF_ASA_CSR_VL NIC2;
+				sapd-connectivity MANAGEMENT MANAGEMENT;
+				sapd-connectivity FACING_PROVIDER_SAPD NIC1;
+			}
+			#Below define Virtual Link definitions
+			virtual-link-profile INTER_VNF_CSR_ASA_VL {
+				flavor small;
+				max-bitrate-requirements {
+					root 1000;
+				}
+				min-bitrate-requirements {
+					root 500;
+				}
+			}
+			virtual-link-profile INTER_VNF_ASA_CSR_VL {
+				flavor small;
+				max-bitrate-requirements {
+					root 1000;
+				}
+				min-bitrate-requirements {
+					root 500;
+				}
+			}
+			virtual-link-profile ASA_FAILOVER_VL {
+				flavor small;
+				max-bitrate-requirements {
+					root 1000;
+				}
+				min-bitrate-requirements {
+					root 500;
+				}
+			}
+			#This defines the preference by the VNFs in HA scenario
+			affinity-or-anti-affinity-group ASA_GROUP{
+				affinity-type anti-affinity;
+				affinity-scope nfvi-node;
+			}
+			affinity-or-anti-affinity-group CSR_C_GROUP{
+				affinity-type anti-affinity;
+				affinity-scope nfvi-node;
+			}
+			affinity-or-anti-affinity-group CSR_P_GROUP{
+				affinity-type anti-affinity;
+				affinity-scope nfvi-node;
+			}
+			instantiation-level HA {
+				description basic;
+				vnf-to-level-mapping ASA_P {
+					number-of-instances 1;
+				}
+				vnf-to-level-mapping ASA_S {
+					number-of-instances 1;
+				}
+				vnf-to-level-mapping CSR_C {
+					number-of-instances 1;
+				}
+				vnf-to-level-mapping CSR_P {
+					number-of-instances 1;
+				}
+				vl-to-level-mapping INTER_VNF_CSR_ASA_VL {
+					root 0;
+				}
+				vl-to-level-mapping INTER_VNF_ASA_CSR_VL {
+					root 0;
+				}
+			}
+		}
+	}
+}

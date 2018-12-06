@@ -1,0 +1,60 @@
+#VNFD definition for ASAv Secondary  where Day0, Credentials are provided
+sae-catalog SAE_CATALOG {
+        vnfd-deployment VD_ASA_SM {
+        vnfd               V_ASA;
+        vdu                VDU_ASA_SRIOV;
+        var HOSTNAME {
+            val ASA_SRIOV;
+        }
+        var METRIC_OCC_FALSE {
+            val 20;
+        }
+        var METRIC_OCC_TRUE {
+            val 9;
+        }
+        var METRIC_VALUE {
+            val 50;
+        }
+        var MGMT_IF {
+            val management;
+        }
+        var POLL_FREQUENCY {
+            val 15;
+        }
+        var VFIREWALL_ENABLESECRET {
+            val "cisco123";
+        }
+        var VFIREWALL_PASSWORD {
+            val "cisco123";
+        }
+        var VFIREWALL_USERNAME {
+            val admin;
+        }
+        bootup-time        600;
+        recovery-wait-time 90;
+        vnf-authgroup      ASA_AUTHGROUP;
+        day0 day0-config {
+            url http://172.29.89.209:8080/day0/VD_ASA_SM_day0.txt;
+            var LICENSE_TOKEN {
+                val MzUxZDQ3MDMtMjA2MS00NTFmLTk2Y2QtMmM2NzkxNjIyYmZlLTE1NTAwMDI2%0AMzY2MDl8bytyYjkva1kzZmdWdUlkbHFaOFZ2MUxQZVh5bGM5cjhsRVpIRjk0%0AYnBHWT0%3D%0A;
+            }
+            var NSO_LOGIN_PASSWORD {
+                val "cisco123";
+            }
+            var NSO_LOGIN_USERNAME {
+                val saesol;
+            }
+            var SP_ENABLESECRET_VFW {
+                val "cisco123";
+            }
+            var SP_HOSTNAME_VFW {
+                val VD_ASA_SM;
+            }
+        }
+        vnf-type           asav;
+        asav-ha-settings {
+        ha-role                   standby;
+        failover-connection-point NIC1;
+        }
+    }
+}

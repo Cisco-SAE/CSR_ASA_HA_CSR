@@ -1,0 +1,47 @@
+#VNFD deployment for Provider end CSR
+#Provide Day0 and Credentials
+sae-catalog SAE_CATALOG {
+        vnfd-deployment VD_CSR_PP {
+                vnfd               V_CSR;
+                vdu                VDU_CSR_SRIOV;
+                var METRIC_OCC_FALSE {
+                        val 3;
+                }
+                var METRIC_OCC_TRUE {
+                        val 3;
+                }
+                var METRIC_VALUE {
+                        val 50;
+                }
+                var POLL_FREQUENCY {
+                        val 15;
+                }
+                bootup-time        600;
+                recovery-wait-time 90;
+                vnf-authgroup      CSR_AUTHGROUP;
+                day0 iosxe_config.txt {
+                        url http://172.29.89.209:8080/day0/VD_CSR_P_day0.txt;
+                        var EPASSWORD {
+                                val "cisco123";
+                        }
+                        var LICENSE_TOKEN {
+                                val MzUxZDQ3MDMtMjA2MS00NTFmLTk2Y2QtMmM2NzkxNjIyYmZlLTE1NTAwMDI2%0AMzY2MDl8bytyYjkva1kzZmdWdUlkbHFaOFZ2MUxQZVh5bGM5cjhsRVpIRjk0%0AYnBHWT0%3D%0A;
+                        }
+                        var PASSWORD {
+                                val "cisco123";
+                        }
+                        var SW_AS_NUMBER {
+                                val 100;
+                        }
+                        var TNAME {
+                                val 1;
+                        }
+                        var NAME_SERVER {
+                                val "171.70.168.183";
+                        }
+                        var DOMAIN_NAME {
+                                val cisco.com;
+                        }
+                }
+        }
+}

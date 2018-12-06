@@ -1,0 +1,95 @@
+#example:  Day0 for Consumer EPGW CSR
+# Create a file call EPGW_CSR_DAY0_CON.txt and paste the following content to
+# Make sure to use the same file name for defining the Consumer CSR EPGW in the VNFD deployment below
+ 
+hostname CSR-PRO-$NICID_0_IP_ADDRESS
+license smart enable
+username admin privilege 15 password $PASSWORD
+ip domain-name cisco.com
+crypto key generate rsa modulus 1024
+!
+enable secret $PASSWORD
+enable password $EPASSWORD
+ip vrf mgmt
+description management
+!
+!
+ip name-server vrf mgmt 171.70.168.183
+ip domain name cisco.com
+!
+interface GigabitEthernet1
+description VR_MANAGEMENT_INTERFACE
+ip vrf forwarding mgmt
+ip address $NICID_0_IP_ADDRESS $NICID_0_CIDR_ADDRESS
+negotiation auto
+no shut
+!
+interface GigabitEthernet2
+description CUSTOMER_FACING_INTERFACE
+ip address $NICID_1_IP_ADDRESS $NICID_1_CIDR_ADDRESS
+negotiation auto
+no shut
+!
+interface GigabitEthernet3
+description FABRIC_FACING_INTERFACE
+ip address $NICID_2_IP_ADDRESS $NICID_2_CIDR_ADDRESS
+ip ospf lls disable
+negotiation auto
+no shut
+!
+interface GigabitEthernet4
+mtu 9216
+no shut
+!
+line pro 0
+exec-timeout 30 0
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ privilege level 15
+ password 7 01100F175804575D72
+ login local
+ transport input all
+line vty 5 15
+ privilege level 15
+ login local
+ transport input ssh
+!
+ip tftp source-interface GigabitEthernet1
+ip ssh source-interface GigabitEthernet1
+ip ssh version 2
+ip ssh server algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip ssh client algorithm encryption aes128-ctr aes192-ctr aes256-ctr
+ip route vrf mgmt 0.0.0.0 0.0.0.0 $NICID_0_GATEWAY
+no ip ssh stricthostkeycheck
+!
+router bgp $VD_CSR_PP_ASNUMBER
+ bgp router-id $NICID_0_IP_ADDRESS
+ bgp log-neighbor-changes
+ neighbor $VD_CSR_PP_NICID_1_NEIGHBOR_IP_ADDRESS_1 remote-as $VD_CSR_PP_NICID_1_NEIGHBOR_ASNUMBER
+ neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_1 remote-as $VD_CSR_PP_NICID_2_NEIGHBOR_ASNUMBER
+ neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_2 remote-as $VD_CSR_PP_NICID_2_NEIGHBOR_ASNUMBER
+ address-family ipv4 unicast
+  network $VD_CSR_PP_NICID_2_FROM_SUBNET_IP mask $VD_CSR_PP_NICID_2_FROM_SUBNET_MASK
+  redistribute connected
+  neighbor $VD_CSR_PP_NICID_1_NEIGHBOR_IP_ADDRESS_1 local-as $VD_CSR_PP_NICID_1_NEIGHBOR_REMOTE_LOCAL_AS no-prepend replace-as
+  neighbor $VD_CSR_PP_NICID_1_NEIGHBOR_IP_ADDRESS_1 activate
+  neighbor $VD_CSR_PP_NICID_1_NEIGHBOR_IP_ADDRESS_1 soft-reconfiguration inbound
+  neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_1 activate
+  neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_1 soft-reconfiguration inbound
+  neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_2 activate
+  neighbor $VD_CSR_PP_NICID_2_NEIGHBOR_IP_ADDRESS_2 soft-reconfiguration inbound
+  maximum-paths 2
+ exit-address-family
+
+ip http client source-interface GigabitEthernet1
+service internal
+service call-home
+license smart enable
+alias exec token license smart register idtoken $LICENSE_TOKEN
+ip domain lookup
+do test license smart dev-cert enable
+do token force
+do write mem
+platform hardware throughput level MB 2500

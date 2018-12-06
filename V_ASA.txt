@@ -1,0 +1,100 @@
+#Definition of ASA VNF
+nfvo {
+	vnfd V_ASA {
+		provider                 Cisco;
+		product-name             "virtual ASA";
+		version                  9.4.3;
+		product-info-description "Virtual security appliance";
+		#This VNF has 4 interfaces:Management, Inside Data, Outside Data, HA heartbeat
+		#THe type NIC can be specified here:SR-IOV, Virtio
+		vdu VDU_ASA_SRIOV {
+			internal-connection-point-descriptor MANAGEMENT {
+				external-connection-point-descriptor MANAGEMENT;
+				layer-protocol                       Ethernet;
+				interface-id                         0;
+			}
+			internal-connection-point-descriptor NIC1 {
+				external-connection-point-descriptor NIC1;
+				layer-protocol                       Ethernet;
+				interface-id                         1;
+			}
+			internal-connection-point-descriptor NIC2 {
+				external-connection-point-descriptor NIC2;
+				virtual-network-interface-requirement R2 {
+					support-mandatory;
+					requirement       SR-IOV;
+				}
+				layer-protocol                       Ethernet;
+				interface-id                         2;
+			}
+			internal-connection-point-descriptor NIC3 {
+				external-connection-point-descriptor NIC3;
+				virtual-network-interface-requirement R2 {
+					support-mandatory;
+					requirement       SR-IOV;
+				}
+				layer-protocol                       Ethernet;
+				interface-id                         3;
+			}
+			virtual-compute-descriptor vcd;
+			virtual-storage-descriptor [ root ];
+			software-image-descriptor {
+				name             asav992.qcow2;
+				container-format bare;
+				disk-format      qcow2;
+				image            file:///home/admin/sae-m3/config/images/asav992.qcow2;
+				additional-setting disk_type {
+					value virtio;
+				}
+			}
+			#This assumers customer is using Cisco NSO NED(Network Element Driver) for ASAv
+			device-type {
+				cli {
+					ned-id asa-id:cisco-asa;
+				}
+			}
+			#This is day0 file for the ASAv- definition is in the VNF deployment file
+			day0 day0-config {
+				mandatory;
+			}
+		}
+
+		virtual-compute-descriptor vcd {
+			virtual-memory {
+				virtual-memory-size 4.0;
+			}
+			virtual-cpu {
+				number-of-virtual-cpus 4;
+			}
+		}
+		virtual-storage-descriptor root {
+			type-of-storage root;
+			size-of-storage 10;
+		}
+		external-connection-point-descriptor MANAGEMENT {
+			layer-protocol Ethernet;
+			management;
+		}
+		external-connection-point-descriptor NIC1 {
+			layer-protocol Ethernet;
+		}
+		external-connection-point-descriptor NIC2 {
+			layer-protocol Ethernet;
+		}
+		external-connection-point-descriptor NIC3 {
+			layer-protocol Ethernet;
+		}
+		deployment-flavor VDU_ASA_SRIOV {
+			vdu-profile VDU_ASA_SRIOV {
+				min-number-of-instances 1;
+				max-number-of-instances 1;
+			}
+			instantiation-level V_ASA {
+				vdu-level VDU_ASA_SRIOV {
+					number-of-instances 1;
+				}
+			}
+			default-instantiation-level V_ASA;
+		}
+	}
+}

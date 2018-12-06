@@ -1,0 +1,20 @@
+#Per site preferences to deploy NSD
+
+sae-catalog SAE_CATALOG {
+        nsd-deployment ND_CSR_ASA_CSR_E2E {
+        nsd N_CSR_ASA_CSR_E2E;
+        nsd-deployment-flavor HA;
+        vnf-deployment ASA_P {
+            vnfd-deployment VD_ASA_PM;
+        }
+        vnf-deployment ASA_S {
+            vnfd-deployment VD_ASA_SM;
+        }
+        vnf-deployment CSR_C {
+            vnfd-deployment VD_CSR_PC;
+        }
+                vnf-deployment CSR_P {
+            vnfd-deployment VD_CSR_PP;
+        }
+    }
+}

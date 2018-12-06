@@ -1,0 +1,21 @@
+#Create Consumer and Provider end-points
+#Each Endpoint needs VLAN #, ASN, IP and Netmask
+
+sae-site SANJOSE {
+        external-end-point CONSUMER20 {
+        traffic-hand-off-method vlan-only;
+        vlan-number             20;
+        branch-bgp-as-number    20;
+        branch-remote-as-number 28;
+        endpoint-ipaddress      20.20.20.1;
+        endpoint-netmask        255.255.255.0;
+    }
+    external-end-point PROVIDER200 {
+        traffic-hand-off-method vlan-only;
+        vlan-number             2001;
+        branch-bgp-as-number    200;
+        branch-remote-as-number 209;
+        endpoint-ipaddress      200.200.200.1;
+        endpoint-netmask        255.255.255.0;
+    }
+}

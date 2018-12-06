@@ -1,0 +1,22 @@
+#Deploy the service chain (CSR-ASA-CSR)
+#Connect it to Data Endpoints -Consumer/Provider
+sae-site SANJOSE {
+        service-chain E2E_CSR_ASA_CSR {
+                deployment-name ND_CSR_ASA_CSR_E2E;
+                type            end-to-end;
+                consumer-end-point CONSUMER20 {
+                        connectivity FACING_CONSUMER_SAPD {
+                                ip 20.20.20.20 {
+                                        vnf-profile CSR_C;
+                                }
+                        }
+                }
+                provider-end-point PROVIDER200 {
+                        connectivity FACING_PROVIDER_SAPD {
+                                ip 200.200.200.200 {
+                                        vnf-profile CSR_P;
+                                }
+                        }
+                }
+        }
+}

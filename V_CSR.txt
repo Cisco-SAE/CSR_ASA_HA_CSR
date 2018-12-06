@@ -1,0 +1,91 @@
+#Definition of CSA VNF
+nfvo {
+	vnfd V_CSR {
+	provider                 Cisco;
+	product-name             "CSR 1000v";
+	version                  1.0;
+	product-info-description "Cloud router";
+	#This VNF has 4 interfaces:Management, Inside Data, Outside Data, HA heartbeat
+  #THe type NIC can be specified here:SR-IOV, Virtio
+		vdu VDU_CSR_SRIOV {
+			internal-connection-point-descriptor NIC1 {
+					external-connection-point-descriptor NIC1;
+					virtual-network-interface-requirement R1 {
+							support-mandatory;
+							requirement       SR-IOV;
+					}
+					layer-protocol                       Ethernet;
+					interface-id                         1;
+			}
+			internal-connection-point-descriptor MANAGEMENT {
+					external-connection-point-descriptor MANAGEMENT;
+					layer-protocol                       Ethernet;
+					interface-id                         0;
+			}
+			internal-connection-point-descriptor NIC2 {
+					external-connection-point-descriptor NIC2;
+					virtual-network-interface-requirement R1 {
+							support-mandatory;
+							requirement       SR-IOV;
+					}
+					layer-protocol                       Ethernet;
+					interface-id                         2;
+			}
+			virtual-compute-descriptor vcd;
+			virtual-storage-descriptor [ root ];
+			software-image-descriptor {
+					name             csr1000v-universalk9.16.08.01a.qcow2;
+					container-format bare;
+					disk-format      qcow2;
+					image            file:///opt/cisco/nso/images/csr1000v-universalk9.16.08.01a.qcow2;
+					additional-setting serial_console {
+							value true;
+					}
+				}
+				#This assumers customer is using Cisco NSO NED(Network Element Driver) for CSR
+				device-type {
+						cli {
+								ned-id ios-id:cisco-ios;
+						}
+				}
+					#This is day0 file for the CSRv- definition is in the VNF deployment file
+				day0 iosxe_config.txt {
+						mandatory;
+				}
+			}
+			virtual-compute-descriptor vcd {
+			virtual-memory {
+					virtual-memory-size 4.0;
+			}
+			virtual-cpu {
+					number-of-virtual-cpus 2;
+						}
+			}
+			virtual-storage-descriptor root {
+					type-of-storage root;
+					size-of-storage 10;
+			}
+			external-connection-point-descriptor NIC1 {
+					layer-protocol Ethernet;
+			}
+			external-connection-point-descriptor MANAGEMENT {
+					layer-protocol Ethernet;
+					management;
+			}
+			external-connection-point-descriptor NIC2 {
+					layer-protocol Ethernet;
+			}
+			deployment-flavor VDU_CSR_SRIOV {
+					vdu-profile VDU_CSR_SRIOV {
+							min-number-of-instances 1;
+							max-number-of-instances 1;
+					}
+			instantiation-level V_CSR {
+					vdu-level VDU_CSR_SRIOV {
+							number-of-instances 1;
+					}
+			}
+			default-instantiation-level V_CSR;
+        }
+	}
+}
